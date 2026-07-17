@@ -8,8 +8,11 @@
 </head>
 <body>
 
-    <div class="layout-wrapper">
-        <!-- Coluna Esquerda: Emparelhamentos -->
+    <!-- Botão pequeno de Reset no canto superior direito -->
+    <button id="resetBtn" class="action-btn btn-danger reset-top-right" onclick="resetTournament()" title="Resetar Torneio">⚠️ Reset</button>
+
+    <!-- Main Tournament View -->
+    <div class="layout-wrapper" id="mainLayout">
         <div class="left-column">
             <div class="header">
                 <h2>⚔️ Emparelhamentos</h2>
@@ -17,14 +20,15 @@
             <div class="round-controls">
                 <button id="generateRoundBtn" onclick="generatePairings()">Gerar Próxima Ronda</button>
                 <p id="roundInfo" style="color: var(--text-muted); font-size: 0.9rem; margin-top: 10px;">Ronda: 0 / 5</p>
+                
+                <!-- Botão Pódio -->
+                <button id="podiumBtn" onclick="showPodium()" style="display: none; background-color: #f1c40f; color: #000; margin-top: 15px;">🏆 Ver Pódio</button>
             </div>
             <div id="pairingsList" class="pairings-list">
-                <!-- Emparelhamentos gerados por JavaScript -->
                 <p style="text-align: center; color: var(--text-muted); margin-top: 20px;">Adiciona pelo menos 6 jogadores e gera a 1.ª ronda.</p>
             </div>
         </div>
 
-        <!-- Coluna Direita: Tabela de Classificação -->
         <div class="right-column container">
             <div class="header">
                 <h1>🏆 Live Standings</h1>
@@ -44,6 +48,7 @@
                         <th>Jogos</th>
                         <th>Edit Pts</th>
                         <th>Edit Jogos</th>
+                        <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody id="leaderboardBody">
@@ -51,6 +56,38 @@
                 </tbody>
             </table>
         </div>
+    </div>
+
+    <!-- Podium View (Escondida por defeito) -->
+    <div id="podiumView" class="podium-view" style="display: none;">
+        <h1 style="font-size: 2.5rem; margin-bottom: 2rem;">🏆 Vencedores do Torneio 🏆</h1>
+        <div class="podium">
+            <!-- 2º Lugar -->
+            <div class="podium-spot second-place">
+                <div class="podium-name" id="podium-2-name">-</div>
+                <div class="step step-2">
+                    <span class="place-number">2º</span>
+                    <span class="prize">1 circuito sê como a água</span>
+                </div>
+            </div>
+            <!-- 1º Lugar -->
+            <div class="podium-spot first-place">
+                <div class="podium-name" id="podium-1-name" style="color: #f1c40f; font-size: 1.5rem;">-</div>
+                <div class="step step-1">
+                    <span class="place-number">1º</span>
+                    <span class="prize">1 Saudade</span>
+                </div>
+            </div>
+            <!-- 3º Lugar -->
+            <div class="podium-spot third-place">
+                <div class="podium-name" id="podium-3-name">-</div>
+                <div class="step step-3">
+                    <span class="place-number">3º</span>
+                    <span class="prize">1 lágrima</span>
+                </div>
+            </div>
+        </div>
+        <button onclick="closePodium()" style="margin-top: 4rem; background-color: #403d39;">Voltar ao Dashboard</button>
     </div>
 
     <script src="script.js"></script>

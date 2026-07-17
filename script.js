@@ -9,7 +9,83 @@ const leaderboardBody = document.getElementById('leaderboardBody');
 const pairingsList = document.getElementById('pairingsList');
 const roundInfo = document.getElementById('roundInfo');
 
-// Adicionar novo jogador
+// --- SISTEMA DE AUTO-SAVE ---
+function saveData() {
+    const tournamentData = {
+        players: players,
+        nextId: nextId,
+        currentRound: currentRound,
+        activeMatches: activeMatches
+    };
+    localStorage.setItem('chessTournamentData', JSON.stringify(tournamentData));
+    checkPodiumStatus();
+}
+
+function loadData() {
+    const saved = localStorage.getItem('chessTournamentData');
+    if (saved) {
+        const data = JSON.parse(saved);
+        players = data.players || [];
+        nextId = data.nextId || 1;
+        currentRound = data.currentRound || 0;
+        activeMatches = data.activeMatches || [];
+        
+        if (currentRound > 0) {
+            roundInfo.innerText = `Ronda: ${currentRound} / 5`;
+        }
+        
+        renderLeaderboard();
+        renderPairings();
+    }
+}
+
+function resetTournament() {
+    if (confirm("⚠️ AVISO: Tens a certeza que queres APAGAR todos os dados do torneio e começar de novo?")) {
+        localStorage.removeItem('chessTournamentData');
+        location.reload(); 
+    }
+}
+
+// --- LÓGICA DO PÓDIO ---
+function checkPodiumStatus() {
+    const podiumBtn = document.getElementById('podiumBtn');
+    // Mostra o botão se estivermos na ronda 5 e todos os jogos estiverem resolvidos
+    const allResolved = activeMatches.length > 0 && activeMatches.every(m => m.resolved);
+    
+    if (currentRound >= 5 && allResolved) {
+        podiumBtn.style.display = 'block';
+    } else {
+        podiumBtn.style.display = 'none';
+    }
+}
+
+function showPodium() {
+    // Garante que a lista está ordenada corretamente antes de extrair o top 3
+    players.sort((a, b) => {
+        if (b.points !== a.points) return b.points - a.points;
+        const bucA = getBuchholz(a);
+        const bucB = getBuchholz(b);
+        if (bucB !== bucA) return bucB - bucA;
+        return b.games - a.games; 
+    });
+
+    // Injeta os nomes nos lugares
+    document.getElementById('podium-1-name').innerText = players[0] ? players[0].name : '-';
+    document.getElementById('podium-2-name').innerText = players[1] ? players[1].name : '-';
+    document.getElementById('podium-3-name').innerText = players[2] ? players[2].name : '-';
+
+    // Troca de ecrã
+    document.getElementById('mainLayout').style.display = 'none';
+    document.getElementById('podiumView').style.display = 'flex';
+}
+
+function closePodium() {
+    document.getElementById('mainLayout').style.display = 'flex';
+    document.getElementById('podiumView').style.display = 'none';
+}
+
+
+// --- LÓGICA DO JOGO ---
 addForm.addEventListener('submit', (e) => {
     e.preventDefault();
     if (players.length >= 20) {
@@ -29,10 +105,10 @@ addForm.addEventListener('submit', (e) => {
         });
         playerNameInput.value = '';
         renderLeaderboard();
+        saveData();
     }
 });
 
-// Editar nome do jogador
 function editName(id) {
     const player = players.find(p => p.id === id);
     if (player) {
@@ -41,30 +117,30 @@ function editName(id) {
             player.name = newName.trim();
             renderLeaderboard();
             renderPairings(); 
+            saveData();
         }
     }
 }
 
-// Eliminar jogador
 function deletePlayer(id) {
     const player = players.find(p => p.id === id);
     if (player && confirm(`Tens a certeza que queres remover "${player.name}" do torneio?`)) {
         players = players.filter(p => p.id !== id);
         renderLeaderboard();
+        saveData();
     }
 }
 
-// Atualizar estatísticas manualmente
 function updateStat(id, stat, amount) {
     const player = players.find(p => p.id === id);
     if (player) {
         player[stat] += amount;
         if (player[stat] < 0) player[stat] = 0;
         renderLeaderboard();
+        saveData();
     }
 }
 
-// Calcular Pontuação Buchholz
 function getBuchholz(player) {
     return player.opponents.reduce((sum, oppId) => {
         const opp = players.find(p => p.id === oppId);
@@ -72,7 +148,6 @@ function getBuchholz(player) {
     }, 0);
 }
 
-// Renderizar a tabela
 function renderLeaderboard() {
     players.sort((a, b) => {
         if (b.points !== a.points) return b.points - a.points;
@@ -90,12 +165,8 @@ function renderLeaderboard() {
         
         tr.innerHTML = `
             <td class="rank">${index + 1}</td>
-            <td>
-                <div class="name-container">
-                    ${player.name}
-                    <button class="action-btn" onclick="editName(${player.id})" title="Editar Nome">✏️</button>
-                    <button class="action-btn btn-danger" onclick="deletePlayer(${player.id})" title="Remover Jogador">🗑️</button>
-                </div>
+            <td style="font-weight: 500;">
+                ${player.name}
             </td>
             <td class="points">${player.points}</td>
             <td style="color: var(--text-muted);">${buchholzScore}</td>
@@ -113,12 +184,17 @@ function renderLeaderboard() {
                     <button class="action-btn" onclick="updateStat(${player.id}, 'games', -1)">-1</button>
                 </div>
             </td>
+            <td>
+                <div class="controls">
+                    <button class="action-btn" onclick="editName(${player.id})" title="Editar Nome">✏️</button>
+                    <button class="action-btn btn-danger" onclick="deletePlayer(${player.id})" title="Remover Jogador">🗑️</button>
+                </div>
+            </td>
         `;
         leaderboardBody.appendChild(tr);
     });
 }
 
-// Atribuir resultado a uma partida
 function resolveMatch(matchId, result) {
     const match = activeMatches.find(m => m.id === matchId);
     if (!match || match.resolved) return;
@@ -136,11 +212,12 @@ function resolveMatch(matchId, result) {
     updateStat(match.black.id, 'games', 1);
 
     match.resolved = true;
-    match.resultCode = result; // Guardamos o código do resultado para o UI saber a cor
+    match.resultCode = result; 
+    
     renderPairings(); 
+    saveData();
 }
 
-// Renderizar Emparelhamentos
 function renderPairings() {
     pairingsList.innerHTML = '';
     
@@ -161,7 +238,6 @@ function renderPairings() {
                 </div>
             `;
         } else {
-            // Lógica para injetar a classe CSS correta dependendo do resultado guardado
             let resultClass = '';
             let statusMessage = '';
 
@@ -196,9 +272,10 @@ function renderPairings() {
             `;
         }
     });
+    
+    checkPodiumStatus();
 }
 
-// Lógica de Emparelhamento
 function generatePairings() {
     if (players.length < 6) {
         alert("O torneio necessita de um número mínimo de 6 participantes.");
@@ -271,4 +348,8 @@ function generatePairings() {
 
     renderPairings();
     renderLeaderboard();
+    saveData();
 }
+
+// Inicializar a aplicação a tentar carregar os dados guardados
+window.onload = loadData;

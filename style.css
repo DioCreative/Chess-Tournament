@@ -218,3 +218,90 @@ tr:hover { background-color: rgba(255,255,255,0.05); }
 .win-white .status-text { color: var(--white-piece); }
 .win-black .status-text { color: var(--black-piece); }
 .draw .status-text { color: var(--text-muted); }
+
+/* --- ESTILOS DO PÓDIO --- */
+.podium-view {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    width: 100%;
+    background-color: var(--bg-color);
+}
+
+.podium {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 15px;
+    height: 350px;
+}
+
+.podium-spot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 200px;
+}
+
+.podium-name {
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    text-align: center;
+    color: var(--text-main);
+    word-break: break-word;
+}
+
+.step {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    padding-top: 15px;
+    color: #000;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    box-shadow: 0 -5px 15px rgba(0,0,0,0.4);
+    text-align: center;
+}
+
+.place-number {
+    font-size: 3rem;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.prize {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-top: 10px;
+    padding: 0 10px;
+    opacity: 0.85;
+}
+
+.step-1 { 
+    height: 250px; 
+    background: linear-gradient(to bottom, #f1c40f, #f39c12); 
+}
+.step-2 { 
+    height: 180px; 
+    background: linear-gradient(to bottom, #bdc3c7, #95a5a6); 
+}
+.step-3 { 
+    height: 120px; 
+    background: linear-gradient(to bottom, #cd7f32, #a0522d); 
+}
+
+/* Botão de Reset Top Right */
+.reset-top-right {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    z-index: 1000;
+}
