@@ -179,17 +179,37 @@ button:active { transform: scale(0.96); }
 .btn-danger:hover { background-color: var(--danger-hover); }
 
 table { width: 100%; border-collapse: collapse; }
-th, td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--border); }
+/* Reduz o espaço vertical (padding) para caberem mais linhas no projetor */
+th, td { 
+    padding: 0.4rem 1rem; /* Era 1rem. Ao passar a 0.4rem, a tabela encolhe na vertical */
+    text-align: left; 
+    border-bottom: 1px solid var(--border); 
+}
 th { color: var(--text-muted); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; }
 
 tr { transition: background-color 0.2s; }
 tr:nth-child(even) { background-color: var(--row-alt); }
 tr:hover { background-color: rgba(255,255,255,0.05); }
 
-.rank { font-weight: bold; color: var(--text-muted); width: 30px; }
-.points { font-weight: bold; color: var(--accent); font-size: 1.1rem; }
+.rank { 
+    font-weight: bold; 
+    color: var(--text-muted); 
+    width: 30px; 
+    font-size: 1.2rem; /* Posição maior */
+}
+.points { 
+    font-weight: bold; 
+    color: var(--accent); 
+    font-size: 1.4rem; /* Números dos pontos maiores */
+}
 .controls { display: flex; gap: 5px; align-items: center; }
-.name-container { display: flex; align-items: center; gap: 8px; font-weight: 500; }
+.name-container { 
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+    font-weight: 500; 
+    font-size: 1.2rem; /* Letras do nome maiores */
+}
 
 
 /* Estilos para partidas concluídas */

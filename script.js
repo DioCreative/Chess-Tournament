@@ -161,37 +161,27 @@ function renderTiebreakList() {
 function resolveTiebreak(matchIndex, result) {
     let match = tiebreakHistory[matchIndex];
 
-    // Se houver um novo empate
     if (result === '0.5-0.5') {
         match.resolved = true;
-        
-        // Adiciona uma nova partida ao histórico invertendo as cores
-        tiebreakHistory.push({
-            white: match.black,
-            black: match.white,
-            resolved: false
-        });
-        
+        tiebreakHistory.push({ white: match.black, black: match.white, resolved: false });
         renderTiebreakList();
-        
-        // Faz scroll automático para baixo para ver a nova partida
         window.scrollTo(0, document.body.scrollHeight);
         return;
     }
 
-    // Se houver um vencedor, atribui o ponto decisivo
+    // CORREÇÃO: Em vez de usar updateStat para dar 'points', damos uma 'tiebreakWin'
     if (result === '1-0') {
-        updateStat(match.white.id, 'points', 1);
+        match.white.tiebreakWins = (match.white.tiebreakWins || 0) + 1;
     } else if (result === '0-1') {
-        updateStat(match.black.id, 'points', 1);
+        match.black.tiebreakWins = (match.black.tiebreakWins || 0) + 1;
     }
 
-    // Limpa a memória do desempate e volta ao Dashboard
     tiebreakHistory = [];
     document.getElementById('tiebreakView').style.display = 'none';
     document.getElementById('mainLayout').style.display = 'flex';
     
-    // Atualiza o pódio
+    // Atualiza a tabela com a nova regra de desempate e mostra o pódio
+    renderLeaderboard();
     checkPodiumStatus();
     saveData();
 }
@@ -287,10 +277,20 @@ function getBuchholz(player) {
 
 function renderLeaderboard() {
     players.sort((a, b) => {
+        // 1. Quem tem mais pontos fica à frente
         if (b.points !== a.points) return b.points - a.points;
+        
+        // 2. Se houver empate de pontos, usa o Buchholz
         const bucA = getBuchholz(a);
         const bucB = getBuchholz(b);
         if (bucB !== bucA) return bucB - bucA;
+        
+        // 3. NOVA REGRA: Se houver empate absoluto, usa as vitórias do Desempate (Blitz)
+        const tbA = a.tiebreakWins || 0;
+        const tbB = b.tiebreakWins || 0;
+        if (tbB !== tbA) return tbB - tbA;
+        
+        // 4. Último recurso, número de jogos
         return b.games - a.games; 
     });
 
